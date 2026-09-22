@@ -66,6 +66,3 @@ npm install && npm run dev
 - Mesh WebRTC topology (every peer connects to every peer) hasn't been load-tested past a handful of participants — an SFU (e.g. mediasoup) would be the next architectural step for larger group calls
 - The Whisper fallback service isn't deployed in production (free-tier hosting doesn't have the RAM/CPU to run it reliably) — only affects Firefox/Safari users, since Chrome/Edge use the native Web Speech API
 
-## License
-
-MIT
