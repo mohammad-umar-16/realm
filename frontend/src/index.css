@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Canela";
+  src: url("/fonts/canela/Canela-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Canela";
+  src: url("/fonts/canela/Canela-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+body {
+  @apply bg-bg text-ink;
+  font-family: "General Sans", system-ui, sans-serif;
+}

@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    ports: ["4000:4000"]
+    env_file: ./backend/.env
+    depends_on: [whisper-service]
+
+  whisper-service:
+    build: ./whisper-service
+    ports: ["8000:8000"]
+    env_file: ./whisper-service/.env
+
+  coturn:
+    image: coturn/coturn:latest
+    ports:
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+      - "49152-65535:49152-65535/udp"
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+
+# frontend is run separately via `npm run dev` (Vite) — not containerized for local dev,
+# since HMR over Docker networking adds friction with no real benefit at this stage
