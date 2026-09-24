@@ -80,7 +80,7 @@ export function ContactsPage() {
         </div>
         {error && <p className="mb-3 rounded-md bg-red-900/50 p-2 text-sm text-red-300">{error}</p>}
         {success && <p className="mb-3 rounded-md bg-gold/10 p-2 text-sm text-gold-light">{success}</p>}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             className="flex-1 rounded-md bg-surface-2 p-2 text-ink outline-none transition-colors placeholder:text-ink-muted focus:ring-1 focus:ring-primary-light"
             placeholder="Their email address"
@@ -92,7 +92,7 @@ export function ContactsPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-md bg-primary px-4 font-medium text-ink transition-colors hover:bg-primary-hover disabled:opacity-40"
+            className="whitespace-nowrap rounded-md bg-primary px-4 py-2 font-medium text-ink transition-colors hover:bg-primary-hover disabled:opacity-40"
           >
             Send request
           </button>
@@ -104,15 +104,15 @@ export function ContactsPage() {
           <h2 className="mb-3 text-lg font-medium text-ink">Pending requests</h2>
           <div className="space-y-2">
             {requests.map((r) => (
-              <div key={r.contactId} className="flex items-center justify-between rounded-md bg-surface-2 p-3">
-                <div className="flex items-center gap-3">
+              <div key={r.contactId} className="flex items-center justify-between gap-2 rounded-md bg-surface-2 p-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <Avatar name={r.displayName} />
-                  <div>
-                    <p className="text-ink">{r.displayName}</p>
-                    <p className="text-xs text-ink-muted">{r.email}</p>
+                  <div className="min-w-0">
+                    <p className="truncate text-ink">{r.displayName}</p>
+                    <p className="truncate text-xs text-ink-muted">{r.email}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-shrink-0 gap-2">
                   <button
                     onClick={() => handleAccept(r.contactId)}
                     title="Accept"
@@ -152,15 +152,15 @@ export function ContactsPage() {
         ) : (
           <div className="space-y-2">
             {contacts.map((c) => (
-              <div key={c.id} className="flex items-center justify-between rounded-md bg-surface-2 p-3 transition-colors hover:bg-surface-2/80">
-                <div className="flex items-center gap-3">
+              <div key={c.id} className="flex items-center justify-between gap-2 rounded-md bg-surface-2 p-3 transition-colors hover:bg-surface-2/80">
+                <div className="flex min-w-0 items-center gap-3">
                   <Avatar name={c.displayName} />
-                  <div>
-                    <p className="text-ink">{c.displayName}</p>
-                    <p className="text-xs text-ink-muted">{c.email}</p>
+                  <div className="min-w-0">
+                    <p className="truncate text-ink">{c.displayName}</p>
+                    <p className="truncate text-xs text-ink-muted">{c.email}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-shrink-0 gap-2">
                   <Link
                     to={`/messages/${c.id}`}
                     title="Message"
