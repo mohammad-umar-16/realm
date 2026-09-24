@@ -41,7 +41,7 @@ export function CallControls({ onEnd, onToggleChat }: { onEnd: () => void; onTog
   };
 
   return (
-    <div className="flex items-center justify-center gap-3 bg-surface p-4">
+    <div className="flex items-center justify-center gap-3 bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <ControlButton onClick={handleToggleMic} active={!micEnabled} icon={micEnabled ? Mic : MicOff} label={micEnabled ? "Mute" : "Unmute"} />
       <ControlButton onClick={handleToggleCam} active={!camEnabled} icon={camEnabled ? Video : VideoOff} label={camEnabled ? "Turn camera off" : "Turn camera on"} />
       <ControlButton onClick={toggleTts} active={ttsEnabled} icon={ttsEnabled ? Volume2 : VolumeX} label="Voice translation" />

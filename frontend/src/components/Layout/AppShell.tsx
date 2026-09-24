@@ -23,7 +23,7 @@ export function AppShell() {
 
   return (
     <div className="flex h-screen flex-col lg:flex-row">
-      <div className="flex items-center justify-between border-b border-border bg-surface p-3 lg:hidden">
+      <div className="flex items-center justify-between border-b border-border bg-surface p-3 pt-[max(0.75rem,env(safe-area-inset-top))] lg:hidden">
         <div className="flex items-center gap-2">
           <img src="/logo-icon.png" alt="" className="h-6 w-6 rounded-md" />
           <span className="font-display text-ink">Realm</span>
@@ -74,11 +74,11 @@ export function AppShell() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
+      <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-border bg-surface lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}

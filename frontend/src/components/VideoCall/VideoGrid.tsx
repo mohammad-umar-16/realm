@@ -31,13 +31,7 @@ function VideoTile({
   );
 }
 
-function gridColumns(count: number) {
-  if (count <= 1) return 1;
-  if (count === 2) return 2;
-  if (count <= 4) return 2;
-  if (count <= 6) return 3;
-  return 4;
-}
+const MIN_TILE_WIDTH_PX = 220;
 
 export function VideoGrid() {
   const localStream = useCallStore((s) => s.localStream);
@@ -45,14 +39,20 @@ export function VideoGrid() {
   const peers = useCallStore((s) => s.peers);
 
   const remoteEntries = Array.from(remoteStreams.entries());
-  const tileCount = remoteEntries.length + 1;
-  const columns = gridColumns(tileCount);
 
   return (
-    <div className="grid h-full gap-2 bg-bg p-2" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+    <div
+      className="grid h-full gap-2 bg-bg p-2"
+      style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${MIN_TILE_WIDTH_PX}px, 1fr))` }}
+    >
       {localStream && <VideoTile stream={localStream} muted label="You" mine />}
       {remoteEntries.map(([socketId, stream]) => (
-        <VideoTile key={socketId} stream={stream} label={peers.get(socketId)?.displayName ?? "Guest"} mine={false} />
+        <VideoTile
+          key={socketId}
+          stream={stream}
+          label={peers.get(socketId)?.displayName ?? "Guest"}
+          mine={false}
+        />
       ))}
     </div>
   );

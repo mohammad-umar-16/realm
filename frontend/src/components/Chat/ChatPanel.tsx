@@ -46,7 +46,7 @@ export function ChatPanel({ open, onClose, onSend }: Props) {
 
       <div className="flex gap-2 border-t border-border p-3">
         <input
-          className="flex-1 rounded-md bg-surface-2 p-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-muted focus:ring-1 focus:ring-primary-light"
+          className="flex-1 rounded-md bg-surface-2 p-2 text-ink outline-none transition-colors placeholder:text-ink-muted focus:ring-1 focus:ring-primary-light"
           placeholder="Type a message…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

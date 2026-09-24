@@ -117,17 +117,17 @@ export function ContactsPage() {
                     onClick={() => handleAccept(r.contactId)}
                     title="Accept"
                     aria-label={`Accept request from ${r.displayName}`}
-                    className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm text-ink transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
+                    className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-ink transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
                   >
-                    <Check className="h-3.5 w-3.5" strokeWidth={2} />
+                    <Check className="h-4 w-4" strokeWidth={2} />
                   </button>
                   <button
                     onClick={() => handleDecline(r.contactId)}
                     title="Decline"
                     aria-label={`Decline request from ${r.displayName}`}
-                    className="flex items-center gap-1 rounded-md bg-surface px-3 py-1.5 text-sm text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
+                    className="flex h-10 w-10 items-center justify-center rounded-md bg-surface text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
                   >
-                    <X className="h-3.5 w-3.5" strokeWidth={2} />
+                    <X className="h-4 w-4" strokeWidth={2} />
                   </button>
                 </div>
               </div>
@@ -165,17 +165,17 @@ export function ContactsPage() {
                     to={`/messages/${c.id}`}
                     title="Message"
                     aria-label={`Message ${c.displayName}`}
-                    className="flex items-center gap-1.5 rounded-md border border-primary-light/40 px-3 py-1.5 text-sm text-primary-light transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
+                    className="flex h-10 w-10 items-center justify-center rounded-md border border-primary-light/40 text-primary-light transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
                   >
-                    <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    <MessageCircle className="h-4 w-4" strokeWidth={1.75} />
                   </Link>
                   <button
                     onClick={() => handleCall(c)}
                     title="Call"
                     aria-label={`Call ${c.displayName}`}
-                    className="flex items-center gap-1.5 rounded-md border border-gold/40 px-3 py-1.5 text-sm text-gold-light transition-colors hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                    className="flex h-10 w-10 items-center justify-center rounded-md border border-gold/40 text-gold-light transition-colors hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   >
-                    <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    <Phone className="h-4 w-4" strokeWidth={1.75} />
                   </button>
                 </div>
               </div>
