@@ -1,5 +1,6 @@
 import { Router } from "express";
 import crypto from "node:crypto";
+import rateLimit from "express-rate-limit";
 import { eq, and } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { users, verificationTokens } from "../db/schema.js";
@@ -9,6 +10,14 @@ import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
 const VERIFY_TOKEN_TTL_MS = 60 * 60 * 1000;
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "too many attempts, try again later" },
+});
 
 const toPublicUser = (u: typeof users.$inferSelect) => ({
   id: u.id,
@@ -28,7 +37,7 @@ async function createAndSendVerification(userId: string, email: string) {
   await sendVerificationEmail(email, token);
 }
 
-router.post("/auth/signup", async (req, res) => {
+router.post("/auth/signup", authLimiter, async (req, res) => {
   const { email, password, displayName } = req.body as { email?: string; password?: string; displayName?: string };
   if (!email || !password || !displayName) {
     return res.status(400).json({ error: "email, password, displayName required" });
@@ -77,7 +86,7 @@ router.post("/auth/verify", async (req, res) => {
   res.json({ user: toPublicUser(user) });
 });
 
-router.post("/auth/resend-verification", async (req, res) => {
+router.post("/auth/resend-verification", authLimiter, async (req, res) => {
   const { email } = req.body as { email?: string };
   if (!email) return res.status(400).json({ error: "email required" });
 
@@ -88,7 +97,7 @@ router.post("/auth/resend-verification", async (req, res) => {
   res.json({ message: "if that account exists, an email was sent" });
 });
 
-router.post("/auth/login", async (req, res) => {
+router.post("/auth/login", authLimiter, async (req, res) => {
   const { email, password } = req.body as { email?: string; password?: string };
   if (!email || !password) return res.status(400).json({ error: "email and password required" });
 

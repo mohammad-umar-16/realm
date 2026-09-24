@@ -20,6 +20,7 @@ import { verifyToken, SESSION_COOKIE } from "./lib/auth.js";
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -57,7 +58,6 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   socket.join(`user:${socket.data.userId}`);
-
   registerSignaling(io, socket);
   registerChat(io, socket);
 });
