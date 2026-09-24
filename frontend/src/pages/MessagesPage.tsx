@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { Send, ArrowLeft, MessagesSquare, Users } from "lucide-react";
 import { apiFetch } from "../lib/api";
 import { translateText } from "../hooks/useTranslation";
 import { useAuthStore } from "../store/authStore";
+import { useSocketContext } from "../context/SocketContext";
+import { Avatar } from "../components/ui/Avatar";
+import { EmptyState } from "../components/ui/EmptyState";
+import { Skeleton } from "../components/ui/Skeleton";
 
 interface Conversation {
   contactId: string;
@@ -24,23 +29,39 @@ interface DisplayMessage extends RawMessage {
   translatedText: string;
 }
 
-const CONVERSATIONS_POLL_MS = 5000;
-const THREAD_POLL_MS = 3000;
+interface LiveDmEvent {
+  id: string;
+  text: string;
+  lang: string;
+  createdAt: string;
+  fromUserId: string;
+  toUserId: string;
+}
+
+const CONVERSATIONS_POLL_MS = 15000;
+const THREAD_POLL_MS = 10000;
 
 export function MessagesPage() {
   const { contactId } = useParams<{ contactId?: string }>();
   const navigate = useNavigate();
-  const myLang = useAuthStore((s) => s.user?.preferredLang ?? "en");
+  const authUser = useAuthStore((s) => s.user);
+  const myLang = authUser?.preferredLang ?? "en";
+  const socket = useSocketContext();
 
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<Conversation[] | null>(null);
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [draft, setDraft] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
+  const contactIdRef = useRef(contactId);
+
+  useEffect(() => {
+    contactIdRef.current = contactId;
+  }, [contactId]);
 
   const loadConversations = () => {
     apiFetch<{ conversations: Conversation[] }>("/api/dm/conversations")
       .then((res) => setConversations(res.conversations))
-      .catch(() => {});
+      .catch(() => setConversations([]));
   };
 
   useEffect(() => {
@@ -69,6 +90,23 @@ export function MessagesPage() {
   }, [contactId, myLang]);
 
   useEffect(() => {
+    if (!socket) return;
+
+    const onDmMessage = (payload: LiveDmEvent) => {
+      loadConversations();
+      const openContactId = contactIdRef.current;
+      const otherParty = payload.fromUserId === authUser?.id ? payload.toUserId : payload.fromUserId;
+      if (openContactId && otherParty === openContactId) loadThread();
+    };
+
+    socket.on("dm-message", onDmMessage);
+    return () => {
+      socket.off("dm-message", onDmMessage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, authUser?.id, myLang]);
+
+  useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages]);
 
@@ -81,54 +119,75 @@ export function MessagesPage() {
     loadConversations();
   };
 
-  const activeContact = conversations.find((c) => c.contactId === contactId);
+  const activeContact = conversations?.find((c) => c.contactId === contactId);
 
   return (
     <div className="flex h-full">
-      <aside className="w-72 flex-shrink-0 overflow-y-auto border-r border-border bg-surface">
+      <aside
+        className={`w-full flex-shrink-0 overflow-y-auto border-r border-border bg-surface lg:block lg:w-72 ${
+          contactId ? "hidden" : "block"
+        }`}
+      >
         <h1 className="p-4 font-display text-lg text-ink">Messages</h1>
-        {conversations.length === 0 ? (
-          <p className="p-4 text-sm text-ink-muted">
-            No conversations yet.{" "}
-            <Link to="/contacts" className="text-primary-light hover:underline">
-              Add a contact
-            </Link>{" "}
-            to start one.
-          </p>
+        {conversations === null ? (
+          <div className="space-y-1 p-3">
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+        ) : conversations.length === 0 ? (
+          <div className="p-4">
+            <EmptyState
+              icon={MessagesSquare}
+              title="No conversations yet"
+              subtitle="Add a contact to start messaging."
+              action={
+                <Link to="/contacts" className="text-sm text-primary-light hover:underline">
+                  Go to Contacts
+                </Link>
+              }
+            />
+          </div>
         ) : (
           conversations.map((c) => (
             <button
               key={c.contactId}
               onClick={() => navigate(`/messages/${c.contactId}`)}
-              className={`block w-full border-b border-border p-3 text-left hover:bg-surface-2 ${
+              className={`flex w-full items-center gap-3 border-b border-border p-3 text-left transition-colors hover:bg-surface-2 ${
                 c.contactId === contactId ? "bg-surface-2" : ""
               }`}
             >
-              <div className="flex items-center justify-between">
-                <p className="text-ink">{c.displayName}</p>
-                {c.unreadCount > 0 && (
-                  <span className="rounded-full bg-gold px-2 py-0.5 text-xs text-bg">{c.unreadCount}</span>
+              <Avatar name={c.displayName} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="truncate text-ink">{c.displayName}</p>
+                  {c.unreadCount > 0 && (
+                    <span className="ml-2 flex-shrink-0 rounded-full bg-gold px-2 py-0.5 text-xs text-bg">
+                      {c.unreadCount}
+                    </span>
+                  )}
+                </div>
+                {c.lastMessage && (
+                  <p className="truncate text-xs text-ink-muted">
+                    {c.lastMessage.isOwn ? "You: " : ""}
+                    {c.lastMessage.text}
+                  </p>
                 )}
               </div>
-              {c.lastMessage && (
-                <p className="truncate text-xs text-ink-muted">
-                  {c.lastMessage.isOwn ? "You: " : ""}
-                  {c.lastMessage.text}
-                </p>
-              )}
             </button>
           ))
         )}
       </aside>
 
-      <main className="flex flex-1 flex-col">
+      <main className={`flex flex-1 flex-col ${contactId ? "flex" : "hidden lg:flex"}`}>
         {!contactId ? (
-          <div className="flex flex-1 items-center justify-center text-ink-muted">
-            Select a conversation
-          </div>
+          <EmptyState icon={Users} title="Select a conversation" />
         ) : (
           <>
-            <div className="border-b border-border p-4">
+            <div className="flex items-center gap-2 border-b border-border p-4">
+              <button onClick={() => navigate("/messages")} aria-label="Back to conversations" className="text-ink-muted lg:hidden">
+                <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
+              </button>
+              <Avatar name={activeContact?.displayName ?? "?"} size="sm" />
               <p className="font-display text-ink">{activeContact?.displayName ?? "…"}</p>
             </div>
 
@@ -151,14 +210,18 @@ export function MessagesPage() {
 
             <div className="flex gap-2 border-t border-border p-4">
               <input
-                className="flex-1 rounded-md bg-surface-2 p-2 text-ink outline-none placeholder:text-ink-muted"
+                className="flex-1 rounded-md bg-surface-2 p-2 text-ink outline-none transition-colors placeholder:text-ink-muted focus:ring-1 focus:ring-primary-light"
                 placeholder="Type a message…"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
               />
-              <button onClick={handleSend} className="rounded-md bg-primary px-4 text-ink hover:bg-primary-hover">
-                Send
+              <button
+                onClick={handleSend}
+                aria-label="Send message"
+                className="flex items-center justify-center rounded-md bg-primary px-4 text-ink transition-colors hover:bg-primary-hover"
+              >
+                <Send className="h-4 w-4" strokeWidth={1.75} />
               </button>
             </div>
           </>

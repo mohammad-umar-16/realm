@@ -2,12 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiFetch, ApiRequestError } from "../lib/api";
 import { useAuthStore, type AuthUser } from "../store/authStore";
-
-const FEATURES = [
-  { title: "Live translated captions", detail: "Read what's said, in your own language, as they speak." },
-  { title: "Real-time voice translation", detail: "Hear it spoken back to you, not just subtitled." },
-  { title: "Message across languages", detail: "Chat and call your contacts — everything translates both ways." },
-];
+import { BrandPanel } from "../components/Layout/BrandPanel";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -52,33 +47,8 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen bg-bg">
-      {/* branding / value-prop panel — hidden on small screens, form-only there */}
-      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-surface p-12 lg:flex">
-        <div className="flex items-center gap-3">
-          <img src="/logo-icon.png" alt="" className="h-9 w-9 rounded-lg" />
-          <span className="font-display text-2xl text-ink">Realm</span>
-        </div>
+      <BrandPanel />
 
-        <div className="max-w-md">
-          <h1 className="mb-3 font-display text-4xl leading-tight text-ink">Talk beyond borders.</h1>
-          <p className="mb-10 text-ink-muted">
-            Video call anyone, in any language — Realm translates as you speak, live.
-          </p>
-
-          <div className="space-y-6">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="border-l-2 border-gold pl-4">
-                <p className="font-medium text-ink">{f.title}</p>
-                <p className="text-sm text-ink-muted">{f.detail}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-xs text-ink-muted">Real-time translation across 7 languages</p>
-      </div>
-
-      {/* form panel */}
       <div className="flex w-full items-center justify-center p-6 lg:w-1/2">
         <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
           <div className="mb-2 flex items-center gap-2 lg:hidden">
@@ -107,7 +77,7 @@ export function LoginPage() {
           )}
 
           <input
-            className="w-full rounded-md bg-surface-2 p-2 text-ink outline-none placeholder:text-ink-muted"
+            className="w-full rounded-md bg-surface-2 p-2 text-ink outline-none transition-colors placeholder:text-ink-muted focus:ring-1 focus:ring-primary-light"
             placeholder="Email"
             type="email"
             value={email}
@@ -115,7 +85,7 @@ export function LoginPage() {
             required
           />
           <input
-            className="w-full rounded-md bg-surface-2 p-2 text-ink outline-none placeholder:text-ink-muted"
+            className="w-full rounded-md bg-surface-2 p-2 text-ink outline-none transition-colors placeholder:text-ink-muted focus:ring-1 focus:ring-primary-light"
             placeholder="Password"
             type="password"
             value={password}
@@ -126,7 +96,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-primary p-2 font-medium text-ink hover:bg-primary-hover disabled:opacity-40"
+            className="w-full rounded-md bg-primary p-2 font-medium text-ink transition-colors hover:bg-primary-hover disabled:opacity-40"
           >
             {loading ? "Logging in…" : "Log in"}
           </button>

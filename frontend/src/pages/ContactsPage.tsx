@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { UserPlus, MessageCircle, Phone, Check, X, Users } from "lucide-react";
 import { apiFetch, ApiRequestError } from "../lib/api";
+import { Avatar } from "../components/ui/Avatar";
+import { EmptyState } from "../components/ui/EmptyState";
+import { Skeleton } from "../components/ui/Skeleton";
 
 interface Contact {
   id: string;
@@ -13,7 +17,7 @@ interface ContactRequest extends Contact {
 }
 
 export function ContactsPage() {
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<Contact[] | null>(null);
   const [requests, setRequests] = useState<ContactRequest[]>([]);
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -66,16 +70,19 @@ export function ContactsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 p-8">
+    <div className="mx-auto max-w-2xl space-y-6 p-6 lg:p-8">
       <h1 className="font-display text-2xl text-ink">Contacts</h1>
 
       <form onSubmit={handleAdd} className="rounded-xl bg-surface p-6">
-        <h2 className="mb-3 text-lg font-medium text-ink">Add a contact</h2>
+        <div className="mb-3 flex items-center gap-2">
+          <UserPlus className="h-4 w-4 text-ink-muted" strokeWidth={1.75} />
+          <h2 className="text-lg font-medium text-ink">Add a contact</h2>
+        </div>
         {error && <p className="mb-3 rounded-md bg-red-900/50 p-2 text-sm text-red-300">{error}</p>}
         {success && <p className="mb-3 rounded-md bg-gold/10 p-2 text-sm text-gold-light">{success}</p>}
         <div className="flex gap-2">
           <input
-            className="flex-1 rounded-md bg-surface-2 p-2 text-ink outline-none placeholder:text-ink-muted"
+            className="flex-1 rounded-md bg-surface-2 p-2 text-ink outline-none transition-colors placeholder:text-ink-muted focus:ring-1 focus:ring-primary-light"
             placeholder="Their email address"
             type="email"
             value={email}
@@ -85,7 +92,7 @@ export function ContactsPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-md bg-primary px-4 font-medium text-ink hover:bg-primary-hover disabled:opacity-40"
+            className="rounded-md bg-primary px-4 font-medium text-ink transition-colors hover:bg-primary-hover disabled:opacity-40"
           >
             Send request
           </button>
@@ -98,22 +105,29 @@ export function ContactsPage() {
           <div className="space-y-2">
             {requests.map((r) => (
               <div key={r.contactId} className="flex items-center justify-between rounded-md bg-surface-2 p-3">
-                <div>
-                  <p className="text-ink">{r.displayName}</p>
-                  <p className="text-xs text-ink-muted">{r.email}</p>
+                <div className="flex items-center gap-3">
+                  <Avatar name={r.displayName} />
+                  <div>
+                    <p className="text-ink">{r.displayName}</p>
+                    <p className="text-xs text-ink-muted">{r.email}</p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleAccept(r.contactId)}
-                    className="rounded-md bg-primary px-3 py-1 text-sm text-ink hover:bg-primary-hover"
+                    title="Accept"
+                    aria-label={`Accept request from ${r.displayName}`}
+                    className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm text-ink transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
                   >
-                    Accept
+                    <Check className="h-3.5 w-3.5" strokeWidth={2} />
                   </button>
                   <button
                     onClick={() => handleDecline(r.contactId)}
-                    className="rounded-md bg-surface px-3 py-1 text-sm text-ink-muted hover:text-ink"
+                    title="Decline"
+                    aria-label={`Decline request from ${r.displayName}`}
+                    className="flex items-center gap-1 rounded-md bg-surface px-3 py-1.5 text-sm text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
                   >
-                    Decline
+                    <X className="h-3.5 w-3.5" strokeWidth={2} />
                   </button>
                 </div>
               </div>
@@ -124,28 +138,44 @@ export function ContactsPage() {
 
       <div className="rounded-xl bg-surface p-6">
         <h2 className="mb-3 text-lg font-medium text-ink">Your contacts</h2>
-        {contacts.length === 0 ? (
-          <p className="text-sm text-ink-muted">No contacts yet — add someone by email above.</p>
+        {contacts === null ? (
+          <div className="space-y-2">
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+        ) : contacts.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="No contacts yet"
+            subtitle="Add someone by email above to start calling and messaging them."
+          />
         ) : (
           <div className="space-y-2">
             {contacts.map((c) => (
-              <div key={c.id} className="flex items-center justify-between rounded-md bg-surface-2 p-3">
-                <div>
-                  <p className="text-ink">{c.displayName}</p>
-                  <p className="text-xs text-ink-muted">{c.email}</p>
+              <div key={c.id} className="flex items-center justify-between rounded-md bg-surface-2 p-3 transition-colors hover:bg-surface-2/80">
+                <div className="flex items-center gap-3">
+                  <Avatar name={c.displayName} />
+                  <div>
+                    <p className="text-ink">{c.displayName}</p>
+                    <p className="text-xs text-ink-muted">{c.email}</p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Link
                     to={`/messages/${c.id}`}
-                    className="rounded-md border border-primary-light/40 px-3 py-1 text-sm text-primary-light hover:bg-primary/10"
+                    title="Message"
+                    aria-label={`Message ${c.displayName}`}
+                    className="flex items-center gap-1.5 rounded-md border border-primary-light/40 px-3 py-1.5 text-sm text-primary-light transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
                   >
-                    Message
+                    <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </Link>
                   <button
                     onClick={() => handleCall(c)}
-                    className="rounded-md border border-gold/40 px-3 py-1 text-sm text-gold-light hover:bg-gold/10"
+                    title="Call"
+                    aria-label={`Call ${c.displayName}`}
+                    className="flex items-center gap-1.5 rounded-md border border-gold/40 px-3 py-1.5 text-sm text-gold-light transition-colors hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   >
-                    Call
+                    <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </button>
                 </div>
               </div>
