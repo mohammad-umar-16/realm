@@ -8,6 +8,7 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { registerSignaling } from "./socket/signaling.js";
 import { registerChat } from "./socket/chat.js";
+import { registerDeepgram } from "./socket/deepgram.js";
 import roomsRouter from "./routes/rooms.js";
 import translateRouter from "./routes/translate.js";
 import turnRouter from "./routes/turn.js";
@@ -58,8 +59,10 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   socket.join(`user:${socket.data.userId}`);
+
   registerSignaling(io, socket);
   registerChat(io, socket);
+  registerDeepgram(io, socket);
 });
 
 const PORT = process.env.PORT || 4000;
